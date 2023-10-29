@@ -1,10 +1,8 @@
 import { v4 as generatorId } from "uuid";
-import { useHttp } from "../../hooks/http.hook";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useFormik } from "formik";
-import { heroCreating } from "../../components/heroesList/heroesSlice";
 import { selectAll } from "../heroesFilters/filtersSlice";
-
+import { useCreateHeroMutation } from "../../api/apiSlice";
 import store from "../../store";
 // Задача для этого компонента:
 // Реализовать создание нового героя с введенными данными. Он должен попадать
@@ -18,8 +16,8 @@ import store from "../../store";
 
 const HeroesAddForm = () => {
   const { filtersLoadingStatus } = useSelector(({ filters }) => filters);
-  const dispatch = useDispatch();
-  const { request } = useHttp();
+
+  const [createHero] = useCreateHeroMutation();
 
   const validate = (values) => {
     const errors = {};
@@ -53,9 +51,7 @@ const HeroesAddForm = () => {
     onSubmit: (values, { resetForm }) => {
       const hero = { ...values, id: generatorId() };
 
-      request(`http://localhost:3004/heroes`, "POST", `${JSON.stringify(hero)}`)
-        .then(dispatch(heroCreating(hero)))
-        .catch((error) => console.log(error));
+      createHero(hero).unwrap();
 
       resetForm({
         id: "",
